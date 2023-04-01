@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
 import plotly.express as px
+import matplotlib.pyplot as plt
 from plotly.subplots import make_subplots
 pio.templates.default = "simple_white"
 
@@ -16,7 +17,7 @@ def test_univariate_gaussian():
     print(gaussian_estimation.mu_,gaussian_estimation.var_)
 
     # Question 2 - Empirically showing sample mean is consistent
-    X= np.arange(10,1010,10,dtype=np.int)
+    X= np.arange(10,1010,10)
     Y = np.zeros((X.size,))
     for i in range(X.size):
         Y[i] = np.abs(real_mu-UnivariateGaussian().fit(V[:X[i]]).mu_)
@@ -39,13 +40,39 @@ def test_univariate_gaussian():
 
 def test_multivariate_gaussian():
     # Question 4 - Draw samples and print fitted model
-    raise NotImplementedError()
+    real_mu =np.array([0,0,4,0])
+    real_cov =np.array(
+    [[1, 0.2, 0, 0.5],
+     [0.2, 2, 0, 0],
+     [0, 0, 1, 0],
+     [0.5, 0, 0, 1]])
+
+    X=np.random.multivariate_normal(real_mu,real_cov,1000)
+    multivariate_gaussian_estimation = MultivariateGaussian().fit(X)
+    print(multivariate_gaussian_estimation.mu_)
+    print(multivariate_gaussian_estimation.cov_)
+
 
     # Question 5 - Likelihood evaluation
-    raise NotImplementedError()
+    f= np.linspace(-10, 10, 200)
+    log_likelihood_results = np.zeros([200,200])
+    for i in range (200):
+        for j in range(200):
+            f1 = f[i]
+            f3= f[j]
+            log_likelihood_results[i,j] = \
+                MultivariateGaussian.log_likelihood(np.array([f1,0,f3,0]),real_cov,X)
+    plt.imshow(log_likelihood_results, cmap='viridis',extent=[-10,10,-10,10])
+    plt.colorbar()
+    plt.xlabel("f3")
+    plt.ylabel("f1")
+    plt.title("a good title")
+    plt.show()
+
+
 
     # Question 6 - Maximum likelihood
-    raise NotImplementedError()
+
 
 
 if __name__ == '__main__':

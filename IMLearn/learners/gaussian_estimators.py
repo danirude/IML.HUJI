@@ -100,7 +100,7 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        return -(X.size/2)* np.log(sigma*2*np.pi) - np.sum(((X-mu)**2)/(2*sigma))
+        return -(X.size/2)*np.log(sigma*2*np.pi)-np.sum(((X-mu)**2)/(2*sigma))
 
 
 class MultivariateGaussian:
@@ -173,13 +173,13 @@ class MultivariateGaussian:
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
 
-        exponent_vector = np.einsum("ij,jk,ik->i",X-self.mu_,inv(self.cov_),X-self.mu_)
+        exponent_vector = np.einsum("ij,jk,ik->i",X-self.mu_,inv(self.cov_),
+                                    X-self.mu_)
         return (1/((np.sqrt(2*np.pi)**(np.shape(X)[1]))*abs(det(
-            self.cov_))))*\
-            np.exp(-0.5 * exponent_vector)
+            self.cov_))))*np.exp(-0.5 * exponent_vector)
 
     @staticmethod
-    def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
+    def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) ->float:
         """
         Calculate the log-likelihood of the data under a specified Gaussian model
 

@@ -73,6 +73,11 @@ def test_multivariate_gaussian():
 
     # Question 6 - Maximum likelihood
 
+    indexes_max_likelihood =np.unravel_index(log_likelihood_results.argmax(),
+                                             log_likelihood_results.shape)
+    # best_pair=np.around(f[indexes_max_likelihood],3)
+    print(np.around(f[indexes_max_likelihood[0]],3))
+    print(np.around(f[indexes_max_likelihood[1]], 3))
 
 
 if __name__ == '__main__':

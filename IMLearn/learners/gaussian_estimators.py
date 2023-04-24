@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 from numpy.linalg import inv, det, slogdet
-
+from plotly.subplots import make_subplots
 
 class UnivariateGaussian:
     """

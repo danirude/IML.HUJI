@@ -214,7 +214,7 @@ if __name__ == '__main__':
     loss_std = np.std(loss_arr,axis = 1)
     p_arr = np.array(range(10,101))
     fig = go.Figure((go.Scatter(x=p_arr, y=loss_mean, mode="markers+lines", name="Mean Prediction",
-                                line=dict(dash="dash"), marker=dict(color="green", opacity=.7)),
+                                line=dict(dash="dash"), marker=dict(color="blue", opacity=.7)),
                           go.Scatter(x=p_arr, y=loss_mean-2*loss_std, fill=None, mode="lines",
                                      line=dict(color="lightgrey"), showlegend=False),
                           go.Scatter(x=p_arr, y=loss_mean+2*loss_std, fill='tonexty',

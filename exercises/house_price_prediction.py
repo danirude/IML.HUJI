@@ -118,7 +118,7 @@ def preprocess_data_test(X: pd.DataFrame):
     X.loc[X['floors']>10 ,'floors'] = train_X_means['floors']
     X.loc[X['bedrooms']>10 ,'bedrooms'] = train_X_means['bedrooms']
 
-    
+
 
     for col_name in ['yr_renovated', 'sqft_basement', 'sqft_above', 'sqft_lot', 'sqft_living', 'sqft_above', 'yr_built']:
         X.loc[X[col_name] % 1 != 0, col] = train_X_means[col]
@@ -133,8 +133,7 @@ def preprocess_data_test(X: pd.DataFrame):
     X.loc[X['waterfront'] == '2', 'waterfront'] = 'UNKNOWN'
 
     X=pd.get_dummies(data=X, drop_first=True)
-    print(X.head())
-    #y = pd.DataFrame({'price': X['price']})
+
 
     X= X.reindex(columns=train_X.columns,fill_value=0)
     return X
@@ -158,6 +157,10 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         Path to folder in which plots are saved
     """
 
+    zip_cols = [col for col in X.columns if 'zipcode' in col]
+
+    # drop the dummy variable columns
+    X = X.drop(zip_cols, axis=1)
 
     for feature in X.columns:
         feature_vector = X[feature]
@@ -165,8 +168,8 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         pears_corr = np.cov(feature_vector, response_vector)[0, 1] / (np.std(feature_vector)*
                                                                                np.std(response_vector))
 
-        fig = make_subplots(rows=1, cols=1).add_traces([go.Scatter(x=feature_vector, y=response_vector,
-                                                                    mode='markers', marker=dict(color="blue"))])
+        fig = make_subplots(rows=1, cols=1).add_traces([go.Scatter(x=feature_vector, y=response_vector,mode='markers', marker=dict(color="blue"))])
+
         fig.update_layout(title_text= f"pearson_correlation between {feature} and price is : {pears_corr}").update_yaxes\
             (title_text="price", secondary_y=False, row=1,col=1).update_xaxes \
             (showgrid=False, title_text=f"{feature}", row=1, col=1)
@@ -185,30 +188,21 @@ if __name__ == '__main__':
     y= df['price']
     X = df.drop('price', axis=1)
 
-    print(df.head())
-    print(y.head())
+
 
     # Question 1 - split data into train and test sets
     global train_X
 
     train_X,train_y,test_X,test_y= split_train_test(df,y)
 
-    print(train_X.head())
-    print(train_X.dtypes)
-    print(train_y.head())
-    print(test_X.head())
-    print(test_y.head())
+
     # Question 2 - Preprocessing of housing prices dataset
     train_X,train_y =preprocess_data(train_X,train_y)
     test_X =preprocess_data(test_X)
-    print(train_X.head())
-    print(train_X.dtypes)
-    print(train_y.head())
-    print(test_X.head())
-    print(test_y.head())
+
     # Question 3 - Feature evaluation with respect to response
 
-    #feature_evaluation(train_X, train_y['price'])
+    feature_evaluation(train_X, train_y)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -232,6 +226,7 @@ if __name__ == '__main__':
             test_y_arr=test_y.to_numpy()
             current_loss = linearRegressor.loss(test_X_arr,test_y_arr)
             loss_arr[current_row,j] = current_loss
+
     loss_mean = np.mean(loss_arr,axis = 1)
     loss_std = np.std(loss_arr,axis = 1)
     p_arr = np.array(range(10,101))

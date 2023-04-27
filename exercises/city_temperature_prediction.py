@@ -50,7 +50,7 @@ if __name__ == '__main__':
 
 
     df_israel_month_temp_sd = df_israel.groupby('Month',as_index =False).agg({'Temp':'std'})
-    print(df_israel_month_temp_sd.head())
+
     fig2 = px.bar(df_israel_month_temp_sd, x='Month', y='Temp', title='temp std for each month ')
     #fig2.show()
     fig2.write_image(".fig2.png")
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     df_month_country_temp = df.groupby(['Country','Month'],as_index =False).agg({'Temp':['mean','std']})
 
-    print(df_month_country_temp.head())
+
     fig3 = px.line( x=df_month_country_temp[('Month','')], y=df_month_country_temp[('Temp', 'mean')],
                     color=df_month_country_temp[('Country','')],
                     error_y=df_month_country_temp[('Temp', 'std')])

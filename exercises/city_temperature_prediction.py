@@ -43,7 +43,7 @@ if __name__ == '__main__':
 
     # Question 2 - Exploring data for specific country
     print("Q2")
-    print("*The scarlett resembles in my opinion a wave graph so a polynomial of degree "
+    print("*The scatter plot resembles in my opinion a wave graph so a polynomial of degree "
           "3 might be suitable for this data")
 
 
@@ -52,16 +52,16 @@ if __name__ == '__main__':
 
 
     fig1 = px.scatter(df_israel, x='DayOfYear', y='Temp',color='Year')
-    #fig1.show()
-    fig1.write_image(".fig1.png")
+    fig1.show()
+
 
 
     df_israel_month_temp_sd = df_israel.groupby('Month',as_index =False).agg({'Temp':'std'})
 
     fig2 = px.bar( x=df_israel_month_temp_sd['Month'], y=df_israel_month_temp_sd['Temp'],
                   title='temp std for each month ',labels={'x': 'Month k', 'y':'temp std'})
-    #fig2.show()
-    fig2.write_image(".fig2.png")
+    fig2.show()
+
 
     print("*Based on this graph, I don't expect the model to succeed equally over all months.\nThe reason being that"
           "in months with a relatively low std,such as months 7 and 8, the model will probably give a more accurate"
@@ -75,14 +75,14 @@ if __name__ == '__main__':
     fig3 = px.line( x=df_month_country_temp[('Month','')], y=df_month_country_temp[('Temp', 'mean')],
                     color=df_month_country_temp[('Country','')],
                     error_y=df_month_country_temp[('Temp', 'std')])
-    fig3.write_image(".fig3.png")
+
 
     print("Based on this graph, different countries have different patterns.\n"
           "The model fitted for Israel is likely to work well on Jordan because it's pattern is "
           "similar enough to Israel's.\nThe model is not likely to work well on South Africa and The Netherlands "
           "because their patterns are too different from the Israel's pattern. ")
 
-    #fig3.show()
+    fig3.show()
 
     # Question 4 - Fitting model for different values of `k`
     print("Q4")
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     fig4 = px.bar( x=np.arange(1,11), y=loss_arr, title='loss for each k',labels={'x': 'degree k', 'y':'loss'},
                    text_auto=True)
     fig4.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
-    fig4.write_image(".fig4.png")
+    fig4.show()
     print("k=5 got us the lowest loss, because of this k with a value of 5 best fits the data")
 
     # Question 5 - Evaluating fitted model on different countries
@@ -118,8 +118,7 @@ if __name__ == '__main__':
         other_countries_loss_arr[i] =  poly_model.loss(df_country['DayOfYear'],df_country['Temp'])
     fig5 = px.bar( x=other_countries, y=other_countries_loss_arr,
                    title='loss for other countries',labels={'x': 'Countries', 'y':'Loss'},text_auto=True)
-    fig5.write_image(".fig5.png")
-
-    print("Out of the three countries the model performed best on Jordan, probably because Jordan's Pattern on question 3"
-          "is relatively similar to Israel's pattern.\nThe model performed poorly on South Africa and The Netherlands,"
-          "probably because their patterns in question 3 are too different from Israel's pattern ")
+    fig5.show()
+    print("Out of the three countries the model performed best on Jordan, probably because Jordan's Pattern on question"
+          " 3 is relatively similar to Israel's pattern.\nThe model performed poorly on South Africa and The "
+          "Netherlands, probably because their patterns in question 3 are too different from Israel's pattern ")

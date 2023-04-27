@@ -42,26 +42,18 @@ def preprocess_data_training(X: pd.DataFrame, y: Optional[pd.Series] = None):
 
 
 
-    # print(y.head())
     X=X.assign(price=y)
-    X = X.replace('nan', np.nan)
-    # print(X.head())
     X= X.dropna()
     X=X.drop_duplicates()
 
     X=X.drop(['id','date','lat','long','sqft_living15','sqft_lot15'],axis=1)
-    print(X.dtypes)
-    # removes rows in wchich price is zero
-    X=  X.apply(pd.to_numeric)
-    X = X.drop(X[X['price'] <= 0].index)
-
-
 
     for col_name in ['yr_renovated','sqft_basement','sqft_above','bathrooms','floors','bedrooms']:
         X=X[X[col_name]>=0]
     for col_name in ['sqft_lot','sqft_living','sqft_above','yr_built','zipcode']:
         X=X[X[col_name]>0]
-    for col_name in ['yr_renovated','sqft_basement','sqft_above','sqft_lot','sqft_living','sqft_above','yr_built','zipcode']:
+    for col_name in ['yr_renovated','sqft_basement','sqft_above','sqft_lot','sqft_living','sqft_above',
+                     'yr_built','zipcode']:
         X=X[X[col_name]%1==0]
 
 
@@ -79,22 +71,19 @@ def preprocess_data_training(X: pd.DataFrame, y: Optional[pd.Series] = None):
     X['zipcode'] = X['zipcode'].cat.add_categories(['0'])
     X['waterfront'] = X['waterfront'].astype('category')
     X['waterfront'] = X['waterfront'].cat.add_categories(['UNKNOWN'])
+
     X=pd.get_dummies(data=X, drop_first=True)
     pd.set_option('display.max_columns', None)
-    print(X.head())
     y= X['price']
     X=X.drop('price', axis=1)
     return X,y
 def preprocess_data_test(X: pd.DataFrame):
 
-    #y = pd.DataFrame({'price': X['price']})
-    #X=X.drop('price', axis=1)
-    # print(y.head())
-    #X=X.assign(price=y['price'])
+
+
     train_X_means= train_X.mean()
 
     X=X.drop(['id','date','lat','long','sqft_living15','sqft_lot15'],axis=1)
-
 
     for col in X.columns:
         if((col =='waterfront') | (col =='zipcode') |(col =='price')):
@@ -119,7 +108,8 @@ def preprocess_data_test(X: pd.DataFrame):
 
 
 
-    for col_name in ['yr_renovated', 'sqft_basement', 'sqft_above', 'sqft_lot', 'sqft_living', 'sqft_above', 'yr_built']:
+    for col_name in ['yr_renovated', 'sqft_basement', 'sqft_above',
+                     'sqft_lot', 'sqft_living', 'sqft_above', 'yr_built']:
         X.loc[X[col_name] % 1 != 0, col] = train_X_means[col]
 
 
@@ -157,10 +147,10 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     """
 
     zip_cols = [col for col in X.columns if 'zipcode' in col]
-
+    waterfront_cols  = [col for col in X.columns if 'waterfront' in col]
     # drop the dummy variable columns
     X = X.drop(zip_cols, axis=1)
-
+    X = X.drop(waterfront_cols , axis=1)
     for feature in X.columns:
         feature_vector = X[feature]
         response_vector =y
@@ -170,7 +160,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         fig = make_subplots(rows=1, cols=1).add_traces([go.Scatter(x=feature_vector, y=response_vector,
                                                                    mode='markers', marker=dict(color="blue"))])
 
-        fig.update_layout(title_text= f"pearson_correlation between {feature} and price is : {pears_corr}").\
+        fig.update_layout(title_text= f"Pearson Correlation between {feature} and price is : {pears_corr}").\
             update_yaxes(title_text="price", secondary_y=False, row=1,col=1).update_xaxes \
             (showgrid=False, title_text=f"{feature}", row=1, col=1)
 
@@ -182,13 +172,12 @@ if __name__ == '__main__':
 
     np.random.seed(0)
     df = pd.read_csv("../datasets/house_prices.csv")
-    df = df.replace('nan', np.nan)
     df=df.drop(df[df['price'].isnull()].index)
     df=df.drop(df[df['price'] <= 0].index)
     y= df['price']
     X = df.drop('price', axis=1)
 
-
+    print("Linear Regression Model")
 
     # Question 1 - split data into train and test sets
     global train_X
@@ -197,13 +186,36 @@ if __name__ == '__main__':
 
 
     # Question 2 - Preprocessing of housing prices dataset
+
     train_X,train_y =preprocess_data(train_X,train_y)
     test_X =preprocess_data(test_X)
 
+
+    print("Q2")
+    print("*I decided not to keep the features : id,date,lat,long,sqft_living15 and sqft_lot15."
+          "I kept the rest of the features. \n I didn't keep id because in my opinion it is a "
+          "categorical value that is too specific because there cant cant be two houses with the same id. \n"
+          "I didn't keep 'lat'  because in my opinion it is too generic and doesn't tell me enough about "
+          "the house's location.I didn't keep 'long' for the same reason.\n I didn't keep date,sqft_living15  and "
+          "sqft_lot15 because I dont think that they are relevant enough to the price of the house.")
+
+    print("*zipcode and waterfront are categorical features.I treated them by using dummy variable encoding.\nI "
+          "also added to zipcode a categorical variable 0 and added a categorical variable UNKNOWN in order"
+          " to deal with problematic values in\nthe zipcode and waterfront columns of the test dataset.")
+    print("* I didn't create any other features.")
+
+    print("*For features that are not categorical, I treated invalid/missing values be replacing them with the mean "
+          "of the feature in the training data set.\nFor features that are categorical, if the feature is zipcode I "
+          "replaced the value with 0, and if the feature is waterfront then I replaced the value with UNKNOWN.")
     # Question 3 - Feature evaluation with respect to response
-
+    print("Q3")
     feature_evaluation(train_X, train_y)
-
+    print("A feature that seems to me to be beneficial for the model is sqft_living.\n"
+          "A feature that seems to me to not be beneficial for the model is yr_built.\n"
+          "I conclude if they are beneficial "
+          "or not based on their Pearson Correlation with price.\n"
+          "For sqft_living, it is around 0.7 which suggests that sqft_living is beneficial for the model.\n"
+          "For yr_built it is around 0 which suggests that yr_built is not beneficial for the model.")
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
     #   1) Sample p% of the overall training data
@@ -211,6 +223,16 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
+
+    print("Q4")
+    print("As the percentage increases, the loss and confidence interval both decreases.\n"
+          "The confidence interval seems to be converging to 0 and the loss seems to be converging to "
+          "somewhere near 25B.\nin terms of estimator properties, the estimator seems to be a biased estimator "
+          "because the loss doesn't seem to be converging to 0")
+
+
+
+
 
     rows_num = 100-10+1
     loss_arr = np.zeros((rows_num,10))
@@ -230,10 +252,14 @@ if __name__ == '__main__':
     loss_mean = np.mean(loss_arr,axis = 1)
     loss_std = np.std(loss_arr,axis = 1)
     p_arr = np.array(range(10,101))
-    fig = go.Figure((go.Scatter(x=p_arr, y=loss_mean, mode="markers+lines", name="Mean Prediction",
-                                line=dict(dash="dash"), marker=dict(color="blue")),
+    fig = go.Figure([go.Scatter(x=p_arr, y=loss_mean, mode="markers+lines",
+                                line=dict(dash="dash"), marker=dict(color="blue"),showlegend=False),
                           go.Scatter(x=p_arr, y=loss_mean-2*loss_std, fill=None, mode="lines",
                                      line=dict(color="lightgrey"), showlegend=False),
                           go.Scatter(x=p_arr, y=loss_mean+2*loss_std, fill='tonexty',
-                                     mode="lines", line=dict(color="lightgrey"), showlegend=False)))
-    fig.write_image("MST.png")
+                                     mode="lines", line=dict(color="lightgrey"), showlegend=False)],
+                    layout = go.Layout(title="MSE of test data set as a function of percentage of training data set",
+                                       xaxis=dict(title="Percentage of training data set"),
+                                       yaxis=dict(title="MSE with test data set")))
+
+    fig.show()

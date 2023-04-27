@@ -94,8 +94,7 @@ def preprocess_data_test(X: pd.DataFrame):
     train_X_means= train_X.mean()
 
     X=X.drop(['id','date','lat','long','sqft_living15','sqft_lot15'],axis=1)
-    X=  X.apply(pd.to_numeric)
-    #X = X.drop(X[X['price'] <= 0].index)
+
 
     for col in X.columns:
         if((col =='waterfront') | (col =='zipcode') |(col =='price')):
@@ -168,10 +167,11 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         pears_corr = np.cov(feature_vector, response_vector)[0, 1] / (np.std(feature_vector)*
                                                                                np.std(response_vector))
 
-        fig = make_subplots(rows=1, cols=1).add_traces([go.Scatter(x=feature_vector, y=response_vector,mode='markers', marker=dict(color="blue"))])
+        fig = make_subplots(rows=1, cols=1).add_traces([go.Scatter(x=feature_vector, y=response_vector,
+                                                                   mode='markers', marker=dict(color="blue"))])
 
-        fig.update_layout(title_text= f"pearson_correlation between {feature} and price is : {pears_corr}").update_yaxes\
-            (title_text="price", secondary_y=False, row=1,col=1).update_xaxes \
+        fig.update_layout(title_text= f"pearson_correlation between {feature} and price is : {pears_corr}").\
+            update_yaxes(title_text="price", secondary_y=False, row=1,col=1).update_xaxes \
             (showgrid=False, title_text=f"{feature}", row=1, col=1)
 
 

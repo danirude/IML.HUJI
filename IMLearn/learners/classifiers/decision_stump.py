@@ -39,7 +39,19 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        sign_1_thresholds_and_their_err= np.apply_along_axis(
+            self._find_threshold, axis=0,arr=X,lebels=y,sign=1)
+        sign_minus_1_thresholds_and_their_err = np.apply_along_axis(
+            self._find_threshold, axis=0, arr=X,lebels=y,sign=-1)
+        if (np.min(sign_1_thresholds_and_their_err[1])<=np.min(
+                sign_minus_1_thresholds_and_their_err[1])):
+            j_ = np.argmin(sign_1_thresholds_and_their_err[1])
+            threshold_ = sign_1_thresholds_and_their_err[0][j_]
+            self.sign_=1
+        else:
+            j_ = np.argmin(sign_minus_1_thresholds_and_their_err[1])
+            threshold_ = sign_minus_1_thresholds_and_their_err[0][j_]
+            self.sign_=-1
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -63,7 +75,8 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        y_predicted = np.full(X.shape[0], -self.sign_)
+        y_predicted[X[:, self.j_] >= self.threshold_] = self.sign_
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -95,7 +108,31 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        #right now i think that sorting isnt needed
+        #sorted_indices_for_values = np.argsort(values)
+        #this way the rows will be sorted by the values column
+        #data_matrix = np.column_stack((values, labels))[sorted_indices_for_values]
+
+        #values= values[sorted_indices_for_values]
+        #labels = labels[sorted_indices_for_values]
+
+        min_thr_err =1
+        best_thr=None
+        for value in values:
+            y_given_sign_indices = np.where(values >= value)[0]
+            y_given_minus_sign_indices = np.where(values < value)[0]
+            l_b_plus = (np.count_nonzero(labels[y_given_sign_indices] !=
+                                         sign))/(labels[
+                y_given_sign_indices].size )
+            l_b_minus = np.count_nonzero(
+                labels[y_given_minus_sign_indices] !=-sign)/(labels[
+                            y_given_minus_sign_indices].size )
+            current_thr_err = l_b_plus+l_b_minus
+
+            if (current_thr_err<min_thr_err):
+                min_thr_err =current_thr_err
+                best_thr =value
+        return best_thr,min_thr_err
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -114,4 +151,6 @@ class DecisionStump(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+
+        from ...metrics import misclassification_error
+        return misclassification_error(y,self._predict(X))

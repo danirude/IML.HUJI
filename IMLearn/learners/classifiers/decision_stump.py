@@ -40,17 +40,19 @@ class DecisionStump(BaseEstimator):
             Responses of input data to fit to
         """
         sign_1_thresholds_and_their_err= np.apply_along_axis(
-            self._find_threshold, axis=0,arr=X,lebels=y,sign=1)
+            self._find_threshold, axis=0,arr=X,labels=y,sign=1)
+        print(1)
         sign_minus_1_thresholds_and_their_err = np.apply_along_axis(
-            self._find_threshold, axis=0, arr=X,lebels=y,sign=-1)
+            self._find_threshold, axis=0, arr=X,labels=y,sign=-1)
+        print(2)
         if (np.min(sign_1_thresholds_and_their_err[1])<=np.min(
                 sign_minus_1_thresholds_and_their_err[1])):
-            j_ = np.argmin(sign_1_thresholds_and_their_err[1])
-            threshold_ = sign_1_thresholds_and_their_err[0][j_]
+            self.j_ = np.argmin(sign_1_thresholds_and_their_err[1])
+            self.threshold_ = sign_1_thresholds_and_their_err[0][self.j_]
             self.sign_=1
         else:
-            j_ = np.argmin(sign_minus_1_thresholds_and_their_err[1])
-            threshold_ = sign_minus_1_thresholds_and_their_err[0][j_]
+            self.j_ = np.argmin(sign_minus_1_thresholds_and_their_err[1])
+            self.threshold_ = sign_minus_1_thresholds_and_their_err[0][self.j_]
             self.sign_=-1
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
@@ -77,6 +79,7 @@ class DecisionStump(BaseEstimator):
         """
         y_predicted = np.full(X.shape[0], -self.sign_)
         y_predicted[X[:, self.j_] >= self.threshold_] = self.sign_
+        return y_predicted
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -108,25 +111,29 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        #right now i think that sorting isnt needed
-        #sorted_indices_for_values = np.argsort(values)
+
+        sorted_indices_for_values = np.argsort(values)
         #this way the rows will be sorted by the values column
-        #data_matrix = np.column_stack((values, labels))[sorted_indices_for_values]
 
-        #values= values[sorted_indices_for_values]
-        #labels = labels[sorted_indices_for_values]
+        values= values[sorted_indices_for_values]
+        labels = labels[sorted_indices_for_values]
 
+        iter=0
         min_thr_err =1
         best_thr=None
         for value in values:
+            iter=iter+1
             y_given_sign_indices = np.where(values >= value)[0]
             y_given_minus_sign_indices = np.where(values < value)[0]
             l_b_plus = (np.count_nonzero(labels[y_given_sign_indices] !=
                                          sign))/(labels[
                 y_given_sign_indices].size )
-            l_b_minus = np.count_nonzero(
-                labels[y_given_minus_sign_indices] !=-sign)/(labels[
+            if labels[y_given_minus_sign_indices].size >0:
+                l_b_minus = np.count_nonzero(
+                    labels[y_given_minus_sign_indices] !=-sign)/(labels[
                             y_given_minus_sign_indices].size )
+            else:
+                l_b_minus=0
             current_thr_err = l_b_plus+l_b_minus
 
             if (current_thr_err<min_thr_err):

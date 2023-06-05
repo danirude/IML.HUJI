@@ -64,11 +64,11 @@ class AdaBoost(BaseEstimator):
         self.weights_ =[]
 
         for t in range(self.iterations_):
-
+            print("iteration number : " +str(t))
             sampled_rows = np.random.choice(samples_num, size=samples_num,
                                             p=self.D_)
             random_sample = X[sampled_rows]
-            self.models_ = self.models_.append(self.wl_().fit(random_sample,y))
+            self.models_.append(self.wl_().fit(random_sample,y))
             y_predicted= self.models_[t].predict(X)
             error =  np.dot(self.D_, np.where(y!=y_predicted, 1, 0))
             current_weight = 0.5* np.log((1-error)/error)

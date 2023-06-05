@@ -55,7 +55,12 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     # Question 2 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
     raise NotImplementedError()
 
+
     # Question 3 - Compare best Ridge model, best Lasso model and Least Squares model
+
+    # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
+    
+
     raise NotImplementedError()
 
 

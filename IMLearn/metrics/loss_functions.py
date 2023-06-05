@@ -1,5 +1,5 @@
 import numpy as np
-
+from numpy.linalg import norm
 
 def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """

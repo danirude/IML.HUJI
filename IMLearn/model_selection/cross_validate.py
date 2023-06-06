@@ -37,4 +37,34 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
     validation_score: float
         Average validation score over folds
     """
-    raise NotImplementedError()
+
+    train_score_list = []
+    validation_score_list= []
+    #for now moved randm shuffle to perform model selection
+    # randomly shuffle
+    #indices = np.random.choice(np.arange(X.shape[0]), size=X.shape[0],
+    #                           replace=False)
+   # X =X[indices]
+    #y =y[indices]
+
+    folder_size = int(X.shape[0]/cv)
+    for i in range(0,X.shape[0],folder_size):
+        if i +folder_size>=X.shape[0]:
+            #should effect reakky the step in range of for loop
+            folder_size= X.shape[0]-i
+        folder_indices= np.arange(i, i+folder_size)
+        current_train_X =np.delete(X, folder_indices, axis=0)
+        current_train_y = np.delete(y, folder_indices)
+
+        current_validation_X = X[folder_indices]
+        current_validation_y = y[folder_indices]
+
+        estimator.fit(current_train_X,current_train_y)
+        train_score_list.append(scoring(current_train_y,estimator.predict(current_train_X)))
+        validation_score_list.append(scoring(current_validation_y,estimator.predict(current_validation_X)))
+
+    train_score= sum(train_score_list)/len(train_score_list)
+    validation_score= sum(validation_score_list)/len(validation_score_list)
+    return train_score,validation_score
+
+

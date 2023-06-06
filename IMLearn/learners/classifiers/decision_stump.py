@@ -118,11 +118,10 @@ class DecisionStump(BaseEstimator):
         values= values[sorted_indices_for_values]
         labels = labels[sorted_indices_for_values]
 
-        iter=0
         min_thr_err =1
         best_thr=None
         for value in values:
-            iter=iter+1
+
             y_given_sign_indices = np.where(values >= value)[0]
             y_given_minus_sign_indices = np.where(values < value)[0]
             l_b_plus = (np.count_nonzero(labels[y_given_sign_indices] !=

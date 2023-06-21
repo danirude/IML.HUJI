@@ -110,19 +110,37 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
                 l2_values_for_etas.append(values)
                 plot_descent_path(L2, np.array(weights), f"Descent path for module L2 and eta {curr_eta}")
 
-                
+
+    l1_iterations = np.arange(len(max(l1_values_for_etas, key=len)))
+    l1_fig = go.Figure(layout=go.Layout(   title="L1 Norms As A Function Of The GD Iteration",
+                                           xaxis_title="Iteration", yaxis_title="L1_Norms"))
+    l2_iterations = np.arange(len(max(l2_values_for_etas, key=len)))
+    l2_fig = go.Figure(layout=go.Layout(  title="L1 Norms As A Function Of The GD Iteration", xaxis_title="Iteration",
+        yaxis_title="L1_Norms"))
+
+    for i in range(len(etas)):
+        l1_fig.add_trace(go.Scatter(x=l1_iterations, y=l1_values_for_etas[i],mode='markers+lines',
+                                    name=f"eta={etas[i]}"))
+
+        l2_fig.add_trace(go.Scatter(x=l2_iterations,y=l2_values_for_etas[i],mode='markers+lines',
+                                    name=f"eta={etas[i]}"))
+
+    l1_fig.show()
+    l2_fig.show()
+
+
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                     eta: float = .1,
                                     gammas: Tuple[float] = (.9, .95, .99, 1)):
     # Optimize the L1 objective using different decay-rate values of the exponentially decaying learning rate
-    raise NotImplementedError()
+
 
     # Plot algorithm's convergence for the different values of gamma
-    raise NotImplementedError()
+
 
     # Plot descent path for gamma=0.95
-    raise NotImplementedError()
+
 
 
 def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8) -> \

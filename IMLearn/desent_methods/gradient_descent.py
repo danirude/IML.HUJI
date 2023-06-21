@@ -119,4 +119,15 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        raise NotImplementedError()
+
+        current_weights = f.weights()
+        best_weights= current_weights
+        previous_weight = None
+        t=1
+        while t<=self.max_iter_:
+            t=t+1
+            previous_weight = current_weights
+            
+
+
+

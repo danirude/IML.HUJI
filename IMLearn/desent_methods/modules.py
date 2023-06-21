@@ -33,7 +33,11 @@ class L2(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+
+        return np.linalg.norm(self.weights_)
+
+
+
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -49,7 +53,8 @@ class L2(BaseModule):
         output: ndarray of shape (n_in,)
             L2 derivative with respect to self.weights at point self.weights
         """
-        raise NotImplementedError()
+
+        return 2* self.weights_
 
 
 class L1(BaseModule):
@@ -78,7 +83,8 @@ class L1(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+
+        return np.linalg.norm(self.weights_, ord=1)**2
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -94,8 +100,12 @@ class L1(BaseModule):
         output: ndarray of shape (n_in,)
             L1 derivative with respect to self.weights at point self.weights
         """
-        raise NotImplementedError()
 
+        #turns all values larger than 0 to 1
+        jacob = new_arr = np.where(self.weights_ > 0,1, self.weights_)
+        #turns all values smaller than 0 to -1, values that are equl to zero will stay 0
+        jacob= np.where(jacob <0, -1,jacob)
+        #jacobian should have 1 where weights_>0,-1 where weights_<0 and 0 where weights_=0
 
 class LogisticModule(BaseModule):
     """
@@ -131,7 +141,7 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
         """

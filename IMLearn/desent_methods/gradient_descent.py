@@ -122,12 +122,35 @@ class GradientDescent:
 
         current_weights = f.weights()
         best_weights= current_weights
-        previous_weight = None
+        previous_weights = None
+        weights_sum=current_weights
         t=1
         while t<=self.max_iter_:
             t=t+1
-            previous_weight = current_weights
-            
+            eta = self.learning_rate_.lr_step()
+            previous_weights = current_weights
+            current_weights = current_weights - (eta* f.compute_jacobian(X=X,y=y))
+            weights_sum+=current_weights
 
 
+            if f.weights(current_weights).compute_output(X=X,y=y)<f.weights(best_weights).compute_output(X=X,y=y):
+                best_weights = current_weights
+            f.weights(current_weights) # to make sure f uses current weights in next iteration
+
+            solver = self
+            weights = current_weights
+            val = f.compute_output(X=X,y=y)
+            grad = f.compute_jacobian(X=X,y=y)
+            delta = np.linalg.norm(current_weights-previous_weights)
+            self.callback_(solver,current_weights,val,grad,t,eta,delta)
+
+            if delta<self.tol_:
+                break
+
+        if self.out_type_=="last":
+            return current_weights
+        if self.out_type_=="best":
+            return best_weights
+        if self.out_type_=="average":
+            return weights_sum/t
 

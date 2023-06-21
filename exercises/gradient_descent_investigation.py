@@ -49,6 +49,8 @@ def plot_descent_path(module: Type[BaseModule],
     def predict_(w):
         return np.array([module(weights=wi).compute_output() for wi in w])
 
+    a=descent_path[:, 0]
+    b = descent_path[:, 1]
     from utils import decision_surface
     return go.Figure([decision_surface(predict_, xrange=xrange, yrange=yrange, density=70, showscale=False),
                       go.Scatter(x=descent_path[:, 0], y=descent_path[:, 1], mode="markers+lines", marker_color="black")],
@@ -90,33 +92,37 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
 
-    f_l1=L1(init)
-    f_l2=L2(init)
+
     l1_values_for_etas = list()
     l2_values_for_etas = list()
-    #soon it should
-    best_weights_for_etas=np.zeros(len(etas))
-    for l_num,f in enumerate( [L1(init),L2(init)]):
+    for l_num in range(1,3):
         for i in range(len(etas)):
+            if (l_num == 1):
+                f = L1(init)
+            else:
+                f = L2(init)
+
             curr_eta=etas[i]
             fixed_lr = FixedLR(curr_eta)
             callback,values,weights  =get_gd_state_recorder_callback()
             best_weights_for_curr_eta = GradientDescent(fixed_lr,out_type="best",callback=callback).fit(f,None,None)
-            # l_num is either 0 or 1
-            if l_num+1==1:
+            if l_num==1:
                 l1_values_for_etas.append(values)
-                plot_descent_path(L1,np.array(weights),f"Descent path for module L1 and eta {curr_eta}")
+                fig =plot_descent_path(L1,np.array(weights),f"Descent path for module L1 and eta {curr_eta}")
+                fig.write_image(f'L1{curr_eta}.png')
             else:
                 l2_values_for_etas.append(values)
-                plot_descent_path(L2, np.array(weights), f"Descent path for module L2 and eta {curr_eta}")
+                fig= plot_descent_path(L2, np.array(weights), f"Descent path for module L2 and eta {curr_eta}")
+                fig.write_image(f'L2{curr_eta}.png')
+
 
 
     l1_iterations = np.arange(len(max(l1_values_for_etas, key=len)))
-    l1_fig = go.Figure(layout=go.Layout(   title="L1 Norms As A Function Of The GD Iteration",
-                                           xaxis_title="Iteration", yaxis_title="L1_Norms"))
+    l1_fig = go.Figure(layout=go.Layout(   title="L1 Norm As a function of The GD iteration",
+                                           xaxis_title="Iteration", yaxis_title="L1 Norm"))
     l2_iterations = np.arange(len(max(l2_values_for_etas, key=len)))
-    l2_fig = go.Figure(layout=go.Layout(  title="L1 Norms As A Function Of The GD Iteration", xaxis_title="Iteration",
-        yaxis_title="L1_Norms"))
+    l2_fig = go.Figure(layout=go.Layout(  title="L2 Norm As a function of The GD iteration", xaxis_title="Iteration",
+        yaxis_title="L2 Norm"))
 
     for i in range(len(etas)):
         l1_fig.add_trace(go.Scatter(x=l1_iterations, y=l1_values_for_etas[i],mode='markers+lines',
@@ -128,7 +134,12 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
     l1_fig.show()
     l2_fig.show()
 
+    l1_min_value =np.min(l1_values_for_etas)
+    print(f"L1 best loss is: {l1_min_value}")
 
+    l2_min_value =np.min(l2_values_for_etas)
+
+    print(f"L2 best loss is: {l2_min_value}")
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                     eta: float = .1,

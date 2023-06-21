@@ -34,7 +34,7 @@ class L2(BaseModule):
             Value of function at point self.weights
         """
 
-        return np.linalg.norm(self.weights_)
+        return np.linalg.norm(self.weights_)**2
 
 
 
@@ -84,7 +84,7 @@ class L1(BaseModule):
             Value of function at point self.weights
         """
 
-        return np.linalg.norm(self.weights_, ord=1)**2
+        return np.linalg.norm(self.weights_, ord=1)
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -106,6 +106,7 @@ class L1(BaseModule):
         #turns all values smaller than 0 to -1, values that are equl to zero will stay 0
         jacob= np.where(jacob <0, -1,jacob)
         #jacobian should have 1 where weights_>0,-1 where weights_<0 and 0 where weights_=0
+        return jacob
 
 class LogisticModule(BaseModule):
     """

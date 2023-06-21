@@ -134,13 +134,13 @@ def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.
                                     eta: float = .1,
                                     gammas: Tuple[float] = (.9, .95, .99, 1)):
     # Optimize the L1 objective using different decay-rate values of the exponentially decaying learning rate
-
+    raise NotImplementedError()
 
     # Plot algorithm's convergence for the different values of gamma
-
+    raise NotImplementedError()
 
     # Plot descent path for gamma=0.95
-
+    raise NotImplementedError()
 
 
 def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8) -> \
@@ -190,5 +190,5 @@ def fit_logistic_regression():
 if __name__ == '__main__':
     np.random.seed(0)
     compare_fixed_learning_rates()
-    compare_exponential_decay_rates()
-    fit_logistic_regression()
+    #compare_exponential_decay_rates()
+    #fit_logistic_regression()

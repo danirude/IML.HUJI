@@ -75,10 +75,42 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
     """
 
 
+    values = list()
+    weights = list()
+
+
+    def callback(gradient_descent,weight,val,grad,t,eta,delta):
+        values.append(val)
+        weights.append(weight)
+
+
+    return callback, values, weights
+
+
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
-    raise NotImplementedError()
 
+    f_l1=L1(init)
+    f_l2=L2(init)
+    l1_values_for_etas = list()
+    l2_values_for_etas = list()
+    #soon it should
+    best_weights_for_etas=np.zeros(len(etas))
+    for l_num,f in enumerate( [L1(init),L2(init)]):
+        for i in range(len(etas)):
+            curr_eta=etas[i]
+            fixed_lr = FixedLR(curr_eta)
+            callback,values,weights  =get_gd_state_recorder_callback()
+            best_weights_for_curr_eta = GradientDescent(fixed_lr,out_type="best",callback=callback).fit(f,None,None)
+            # l_num is either 0 or 1
+            if l_num+1==1:
+                l1_values_for_etas.append(values)
+                plot_descent_path(L1,np.array(weights),f"Descent path for module L1 and eta {curr_eta}")
+            else:
+                l2_values_for_etas.append(values)
+                plot_descent_path(L2, np.array(weights), f"Descent path for module L2 and eta {curr_eta}")
+
+                
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                     eta: float = .1,

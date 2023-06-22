@@ -126,8 +126,7 @@ class LogisticRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        if self.include_intercept_:
-            X = np.insert(X, 0, 1, axis=1)
+
         return np.where(self.predict_proba(X)>=self.alpha_,1,0)
 
     def predict_proba(self, X: np.ndarray) -> np.ndarray:
@@ -144,6 +143,8 @@ class LogisticRegression(BaseEstimator):
         probabilities: ndarray of shape (n_samples,)
             Probability of each sample being classified as `1` according to the fitted model
         """
+        if self.include_intercept_:
+            X = np.insert(X,0,1, axis=1)
         return np.exp(X@self.coefs_)/(1+np.exp(X@self.coefs_))
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:

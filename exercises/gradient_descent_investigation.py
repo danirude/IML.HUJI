@@ -192,26 +192,29 @@ def fit_logistic_regression():
     # Plotting convergence rate of logistic regression over SA heart disease data
     X_train_arr, y_train_arr, X_test_arr, y_test_arr= X_train.to_numpy(), \
                 y_train.to_numpy(),X_test.to_numpy(), y_test.to_numpy()
-    logistic_regression = LogisticRegression(solver =GradientDescent(out_type="best"))
+    logistic_regression = LogisticRegression(solver =GradientDescent())
     logistic_regression.fit(X_train_arr,y_train_arr)
-    y_prob = logistic_regression.predict(X_train_arr)
+    y_prob = logistic_regression.predict_proba(X_train_arr)
     fpr, tpr, thresholds = roc_curve(y_train_arr, y_prob)
     fig = go.Figure(
         data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines",
-                         line=dict(color="black", dash='dash'),
-                         name="Random Class Assignment"),
+                         line=dict(color="black", dash='dash')),
               go.Scatter(x=fpr, y=tpr, mode='markers+lines', text=thresholds,
-                         name="", showlegend=False, marker_size=5,
+                         showlegend=False, marker_size=3,
                          hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{x:.3f}<br>TPR: %{y:.3f}")],
         layout=go.Layout(
             title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}={auc(fpr, tpr):.6f}$",
             xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
             yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
+    fig.update_layout(
+        width=600,
+        height=400
+    )
     fig.show()
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    raise NotImplementedError()
+
 
 
 if __name__ == '__main__':

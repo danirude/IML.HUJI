@@ -143,7 +143,8 @@ class GradientDescent:
             weights = current_weights
             grad = f.compute_jacobian(X=X,y=y)
             delta = np.linalg.norm(current_weights-previous_weights)
-            self.callback_(solver,weights,val,grad,t,eta,delta)
+            self.callback_(solver=solver,weights=weights,
+                           val = val,grad=grad,t=t,eta=eta,delta=delta)
 
             if delta<self.tol_:
                 break

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from typing import Tuple, List, Callable, Type
-
+from sklearn.metrics import roc_curve, auc
 from IMLearn import BaseModule
 from IMLearn.desent_methods import GradientDescent, FixedLR, ExponentialLR
 from IMLearn.desent_methods.modules import L1, L2
@@ -79,7 +79,6 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
 
     values = list()
     weights = list()
-
 
     def callback(gradient_descent,weight,val,grad,t,eta,delta):
         values.append(val)
@@ -191,7 +190,24 @@ def fit_logistic_regression():
     X_train, y_train, X_test, y_test = load_data()
 
     # Plotting convergence rate of logistic regression over SA heart disease data
-    raise NotImplementedError()
+    X_train_arr, y_train_arr, X_test_arr, y_test_arr= X_train.to_numpy(), \
+                y_train.to_numpy(),X_test.to_numpy(), y_test.to_numpy()
+    logistic_regression = LogisticRegression(solver =GradientDescent(out_type="best"))
+    logistic_regression.fit(X_train_arr,y_train_arr)
+    y_prob = logistic_regression.predict(X_train_arr)
+    fpr, tpr, thresholds = roc_curve(y_train_arr, y_prob)
+    fig = go.Figure(
+        data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines",
+                         line=dict(color="black", dash='dash'),
+                         name="Random Class Assignment"),
+              go.Scatter(x=fpr, y=tpr, mode='markers+lines', text=thresholds,
+                         name="", showlegend=False, marker_size=5,
+                         hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{x:.3f}<br>TPR: %{y:.3f}")],
+        layout=go.Layout(
+            title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}={auc(fpr, tpr):.6f}$",
+            xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
+            yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
+    fig.show()
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
@@ -200,6 +216,6 @@ def fit_logistic_regression():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    compare_fixed_learning_rates()
+    #compare_fixed_learning_rates()
     #compare_exponential_decay_rates()
-    #fit_logistic_regression()
+    fit_logistic_regression()

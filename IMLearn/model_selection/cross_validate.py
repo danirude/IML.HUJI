@@ -40,12 +40,11 @@ def cross_validate(estimator: BaseEstimator, X: np.ndarray, y: np.ndarray,
 
     train_score_list = []
     validation_score_list= []
-    #for now moved randm shuffle to perform model selection
+
     # randomly shuffle
-    #indices = np.random.choice(np.arange(X.shape[0]), size=X.shape[0],
-    #                           replace=False)
-   # X =X[indices]
-    #y =y[indices]
+    indices = np.random.choice(np.arange(X.shape[0]), size=X.shape[0],replace=False)
+    X =X[indices]
+    y =y[indices]
 
     folder_size = int(X.shape[0]/cv)
     for i in range(0,X.shape[0],folder_size):

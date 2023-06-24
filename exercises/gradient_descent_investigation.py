@@ -117,8 +117,10 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
                 l2_values_for_etas.append(values)
                 fig= plot_descent_path(L2, np.array(weights), f"Descent path for module L2 and eta {curr_eta}")
                 fig.write_image(f'L2{curr_eta}.png')
-            if curr_eta ==0.01:
-                fig.show()
+            #if curr_eta ==0.01:
+                #fig.show()
+
+
 
 
     l1_iterations = np.arange(len(max(l1_values_for_etas, key=len)))
@@ -138,12 +140,17 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
     l1_fig.show()
     l2_fig.show()
 
-    l1_min_value =np.min(l1_values_for_etas)
-    print(f"L1 best loss is: {l1_min_value}")
+    l1_min_value = np.min([np.min(arr) for arr in l1_values_for_etas])
+    l1_eta_of_min_value = etas[np.argmin([np.min(arr) for arr in
+                                          l1_values_for_etas])]
+    print(f"L1 best loss is: {l1_min_value} using the eta: "
+          f"{l1_eta_of_min_value}")
 
-    l2_min_value =np.min(l2_values_for_etas)
-
-    print(f"L2 best loss is: {l2_min_value}")
+    l2_min_value =np.min([np.min(arr) for arr in l2_values_for_etas])
+    l2_eta_of_min_value =etas[np.argmin([np.min(arr) for arr in
+                                         l2_values_for_etas])]
+    print(f"L2 best loss is: {l2_min_value} using the eta: "
+          f"{l2_eta_of_min_value}")
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                     eta: float = .1,
@@ -232,7 +239,7 @@ def fit_logistic_regression():
     # of regularization parameter
     lambdas_arr = np.array([0.001,0.002,0.005,0.01,0.02,0.05,0.1])
     gradient_descent = GradientDescent(learning_rate=FixedLR(1e-4),
-                                    max_iter=2000)
+                                    max_iter=20000)
     logistic_regression = LogisticRegression(solver=gradient_descent,alpha=0.5)
     for l in np.array(["l1","l2"]):
         chosen_lambda = None
@@ -250,7 +257,7 @@ def fit_logistic_regression():
                 chosen_lambda= curr_lam
                 chosen_lambda_validation_error=curr_lam_validation_error
         chosen_logistic_regression = LogisticRegression(
-            solver=GradientDescent(FixedLR(1e-4), max_iter=2000),
+            solver=GradientDescent(FixedLR(1e-4), max_iter=20000),
             penalty=l, lam=chosen_lambda, alpha=0.5)
 
         chosen_logistic_regression.fit(X_train_arr,y_train_arr)
@@ -265,5 +272,45 @@ def fit_logistic_regression():
 if __name__ == '__main__':
     np.random.seed(0)
     compare_fixed_learning_rates()
+    print("Q1")
+    print("In the L1 module, it looks like from a certain point in the path "
+          "to the minimum,\n only one of vector w's 2 coordinates changes "
+          "and the other stays the same.\nThat's because ones that point in "
+          "the path is reached, one of w's coordinates reaches the value 0,\n"
+          "and from that point on,the chosen subgradient will always have "
+          "the value zero in that coordinate.")
+    print("On the other hand, in the L2 module, it looks like the value "
+          " of all w's coordinates always changes in the path to the "
+          "minimum.\nThat is because L2's gradiant, which can change in both "
+          "coordinates at every point in the path")
+    print("Q2")
+    print("One phenomena is that until the iteration in which one of w's "
+          "coordinates reaches the value 0,\n the size of the step is the "
+          "same in each iteration.\nA second phenomena is that ones we reach "
+          "the iteration in which one of w's coordinates reaches the value "
+          "0,\nfrom that point on in each iteration only one of vector w's 2 "
+          "coordinates changes\n and the other stays the same untill the last "
+          "iteration.")
+    print("Q3")
+    print("For eta=1,In both L1 and L2 vector w jumped between\nspecific "
+          "points and as a result the norm didn't converge to any value.")
+    print("For eta=0.1,In L1 it looks like the norm  getting close to zero "
+          "by the last iteration,\n though L1 didn't manage to reach "
+          "the minimum value in 1000 iterations.\nFor L2,the minimum value "
+          "is reached pretty quickly.")
+    print("For eta=0.01,In L2 it looks like the norm getting close to zero "
+          "by the last iteration,\nwith a value in the last iteration that "
+          "is better than the value that we get with  eta=0.1\nHowever, "
+          "L1 didn't manage to reach the minimum value in 1000 iterations.\nFor L2,the minimum value "
+          "is reached,though it take longer than it took when eta=0.1,"
+          "probably because the size of each step is smaller than it was "
+          "when eta=0.1")
+    print("For eta=0.001,In L2 it looks like the norm isn't close enough "
+          "close to zero by the last iteration,\nthat's because the size of "
+          "each step is too small.For L2,it looks like the norm  getting "
+          "close to zero "
+          "by the last iteration,\n though L2 didn't manage to reach "
+          "the minimum value in 1000 iterations.\nAgain,that's because  the size of "
+          "each step is too small.")
     #compare_exponential_decay_rates()
-    fit_logistic_regression()
+    #fit_logistic_regression()

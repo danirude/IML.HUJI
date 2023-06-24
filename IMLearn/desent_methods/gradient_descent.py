@@ -137,7 +137,7 @@ class GradientDescent:
             val = f.compute_output(X=X,y=y)
             if val<best_value:
                 best_weights = current_weights
-
+                best_value=val
 
             solver = self
             weights = current_weights

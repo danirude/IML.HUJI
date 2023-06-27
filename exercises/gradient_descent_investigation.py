@@ -56,8 +56,10 @@ def plot_descent_path(module: Type[BaseModule],
     a=descent_path[:, 0]
     b = descent_path[:, 1]
     from utils import decision_surface
-    return go.Figure([decision_surface(predict_, xrange=xrange, yrange=yrange, density=70, showscale=False),
-                      go.Scatter(x=descent_path[:, 0], y=descent_path[:, 1], mode="markers+lines", marker_color="black")],
+    return go.Figure([decision_surface(predict_, xrange=xrange, yrange=yrange,
+                                       density=70, showscale=False),
+                      go.Scatter(x=descent_path[:, 0], y=descent_path[:, 1],
+                                 mode="markers+lines", marker_color="black")],
                      layout=go.Layout(xaxis=dict(range=xrange),
                                       yaxis=dict(range=yrange),
                                       title=f"GD Descent Path {title}"))
@@ -108,37 +110,47 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
             curr_eta=etas[i]
             fixed_lr = FixedLR(curr_eta)
             callback,values,weights  =get_gd_state_recorder_callback()
-            best_weights_for_curr_eta = GradientDescent(fixed_lr,out_type="best",callback=callback).fit(f,None,None)
+            best_weights_for_curr_eta = GradientDescent(fixed_lr,
+                            out_type="best",callback=callback).fit(f,None,None)
             if l_num==1:
                 l1_values_for_etas.append(values)
-                fig =plot_descent_path(L1,np.array(weights),f"Descent path for module L1 and eta {curr_eta}")
+                fig =plot_descent_path(L1,np.array(weights),
+                            f"Descent path for module L1 and eta {curr_eta}")
                 fig.write_image(f'L1{curr_eta}.png')
             else:
                 l2_values_for_etas.append(values)
-                fig= plot_descent_path(L2, np.array(weights), f"Descent path for module L2 and eta {curr_eta}")
+                fig= plot_descent_path(L2, np.array(weights),
+                            f"Descent path for module L2 and eta {curr_eta}")
                 fig.write_image(f'L2{curr_eta}.png')
-            #if curr_eta ==0.01:
-                #fig.show()
+            if curr_eta ==0.01:
+                 fig.show()
 
 
 
 
     l1_iterations = np.arange(len(max(l1_values_for_etas, key=len)))
-    l1_fig = go.Figure(layout=go.Layout(   title="L1 Norm As a function of The GD iteration",
-                                           xaxis_title="Iteration", yaxis_title="L1 Norm"))
+    l1_fig = go.Figure(layout=go.Layout(
+                            title="L1 Norm As a function of The GD iteration",
+                            xaxis_title="Iteration", yaxis_title="L1 Norm"))
     l2_iterations = np.arange(len(max(l2_values_for_etas, key=len)))
-    l2_fig = go.Figure(layout=go.Layout(  title="L2 Norm As a function of The GD iteration", xaxis_title="Iteration",
-        yaxis_title="L2 Norm"))
+    l2_fig = go.Figure(layout=go.Layout(
+           title="L2 Norm As a function of The GD iteration",
+          xaxis_title="Iteration",
+          yaxis_title="L2 Norm"))
 
     for i in range(len(etas)):
-        l1_fig.add_trace(go.Scatter(x=l1_iterations, y=l1_values_for_etas[i],mode='markers+lines',
+        l1_fig.add_trace(go.Scatter(x=l1_iterations, y=l1_values_for_etas[i],
+                                    mode='markers+lines',
                                     name=f"eta={etas[i]}"))
 
-        l2_fig.add_trace(go.Scatter(x=l2_iterations,y=l2_values_for_etas[i],mode='markers+lines',
+        l2_fig.add_trace(go.Scatter(x=l2_iterations,y=l2_values_for_etas[i],
+                                    mode='markers+lines',
                                     name=f"eta={etas[i]}"))
 
     l1_fig.show()
     l2_fig.show()
+
+
 
     l1_min_value = np.min([np.min(arr) for arr in l1_values_for_etas])
     l1_eta_of_min_value = etas[np.argmin([np.min(arr) for arr in
@@ -194,7 +206,8 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
     """
     df = pd.read_csv(path)
     df.famhist = (df.famhist == 'Present').astype(int)
-    return split_train_test(df.drop(['chd', 'row.names'], axis=1), df.chd, train_portion)
+    return split_train_test(df.drop(['chd', 'row.names'], axis=1), df.chd,
+                                                            train_portion)
 
 
 def fit_logistic_regression():
@@ -206,17 +219,20 @@ def fit_logistic_regression():
                 y_train.to_numpy(),X_test.to_numpy(), y_test.to_numpy()
     logistic_regression = LogisticRegression(solver =GradientDescent())
     logistic_regression.fit(X_train_arr,y_train_arr)
-    y_prob = logistic_regression.predict_proba(X_train_arr)
-    fpr, tpr, thresholds = roc_curve(y_train_arr, y_prob)
+    y_prob = logistic_regression.predict_proba(X_test_arr)
+    fpr, tpr, thresholds = roc_curve(y_test_arr, y_prob)
     c=   [custom[0], custom[-1]]
     fig = go.Figure(
-    data=[go.Scatter(x=[0,1], y=[0,1], mode="lines", line=dict(color="black", dash='dash'), name="Random Class Assignment"),
+    data=[go.Scatter(x=[0,1], y=[0,1], mode="lines", line=dict(color="black",
+                                dash='dash'), name="Random Class Assignment"),
           go.Scatter(x=fpr, y=tpr, mode='markers+lines',text=thresholds,
-                     name="", showlegend=False, marker_size=4, marker_color=c[1][1],
-                     hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{x:.3f}<br>TPR: %{y:.3f}")],
-    layout=go.Layout(title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}={auc(fpr, tpr):.6f}$",
-                                 xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
-                                 yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
+               name="", showlegend=False, marker_size=4, marker_color=c[1][1],
+                hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{"
+                           "x:.3f}<br>TPR: %{y:.3f}")],
+    layout=go.Layout(title=rf"$\text{{ROC Curve Of Fitted Model - AUC}}="
+                           rf"{auc(fpr, tpr):.6f}$",
+                     xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
+                     yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$")))
 
 
     fig.update_layout(
@@ -224,6 +240,7 @@ def fit_logistic_regression():
         height=400
     )
     fig.show()
+
 
     best_alpha = thresholds[np.argmax(tpr-fpr)]
 
@@ -251,8 +268,7 @@ def fit_logistic_regression():
             curr_lam_validation_error=cross_validate(logistic_regression,
                                               X_train_arr,y_train_arr,
                                                 misclassification_error)[1]
-            if chosen_lambda is None or \
-                    curr_lam_validation_error<chosen_lambda_validation_error:
+            if curr_lam_validation_error<chosen_lambda_validation_error:
 
                 chosen_lambda= curr_lam
                 chosen_lambda_validation_error=curr_lam_validation_error
@@ -269,12 +285,13 @@ def fit_logistic_regression():
 
 
 
+
 if __name__ == '__main__':
     np.random.seed(0)
     compare_fixed_learning_rates()
     print("Q1")
     print("In the L1 module, it looks like from a certain point in the path "
-          "to the minimum,\n only one of vector w's 2 coordinates changes "
+          "to the minimum,\nonly one of vector w's 2 coordinates changes "
           "and the other stays the same.\nThat's because ones that point in "
           "the path is reached, one of w's coordinates reaches the value 0,\n"
           "and from that point on,the chosen subgradient will always have "
@@ -285,23 +302,24 @@ if __name__ == '__main__':
           "coordinates at every point in the path")
     print("Q2")
     print("One phenomena is that until the iteration in which one of w's "
-          "coordinates reaches the value 0,\n the size of the step is the "
+          "coordinates reaches the value 0,\nthe size of the step is the "
           "same in each iteration.\nA second phenomena is that ones we reach "
           "the iteration in which one of w's coordinates reaches the value "
           "0,\nfrom that point on in each iteration only one of vector w's 2 "
-          "coordinates changes\n and the other stays the same untill the last "
+          "coordinates changes\nand the other stays the same untill the last "
           "iteration.")
     print("Q3")
     print("For eta=1,In both L1 and L2 vector w jumped between\nspecific "
           "points and as a result the norm didn't converge to any value.")
     print("For eta=0.1,In L1 it looks like the norm  getting close to zero "
-          "by the last iteration,\n though L1 didn't manage to reach "
+          "by the last iteration,\nthough L1 didn't manage to reach "
           "the minimum value in 1000 iterations.\nFor L2,the minimum value "
           "is reached pretty quickly.")
     print("For eta=0.01,In L2 it looks like the norm getting close to zero "
           "by the last iteration,\nwith a value in the last iteration that "
           "is better than the value that we get with  eta=0.1\nHowever, "
-          "L1 didn't manage to reach the minimum value in 1000 iterations.\nFor L2,the minimum value "
+          "L1 didn't manage to reach the minimum value in 1000 iterations.\n"
+          "For L2,the minimum value "
           "is reached,though it take longer than it took when eta=0.1,"
           "probably because the size of each step is smaller than it was "
           "when eta=0.1")
@@ -309,18 +327,20 @@ if __name__ == '__main__':
           "close to zero by the last iteration,\nthat's because the size of "
           "each step is too small.For L2,it looks like the norm  getting "
           "close to zero "
-          "by the last iteration,\n though L2 didn't manage to reach "
-          "the minimum value in 1000 iterations.\nAgain,that's because  the size of "
-          "each step is too small.")
+          "by the last iteration,\nthough L2 didn't manage to reach "
+          "the minimum value in 1000 iterations.\n"
+          "Again,that's because the size of each step is too small.")
     print("Q4")
-    print("L2 reaches a better loss than L1,\n that because it's gradient "
+    print("L2 reaches a better loss than L1,\nthat because it's gradient "
           "allows it take smaller step sizes than the size of L1'S steps,\n"
           "which allows L2 to reach smaller values which it would have "
           "missed if the size of the steps were larger.")
-    print("L1's best loss was reached using eta=0.001,\n this suggest that "
+    print("L1's best loss was reached using eta=0.001,\nthis suggest that "
           "for eta =0.01 the size of the steps are too large smaller values "
           "are missed.\nMeanwhile for eta =0.01, the sizes of the steps  are "
           "small enough to reach some of these smaller values.")
 
+    print("8")
+    print("Q9-11")
     #compare_exponential_decay_rates()
-    #fit_logistic_regression()
+    fit_logistic_regression()

@@ -130,7 +130,8 @@ class GradientDescent:
             t=t+1
             eta = self.learning_rate_.lr_step()
             previous_weights = current_weights
-            current_weights = current_weights - (eta* f.compute_jacobian(X=X,y=y))
+            current_weights = current_weights -  (eta* f.compute_jacobian(
+                                                                X=X,y=y))
             weights_sum+=current_weights
 
             f.weights=current_weights

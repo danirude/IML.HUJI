@@ -288,7 +288,6 @@ def fit_logistic_regression():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    compare_fixed_learning_rates()
     print("Q1")
     print("In the L1 module, it looks like from a certain point in the path "
           "to the minimum,\nonly one of vector w's 2 coordinates changes "
@@ -331,16 +330,18 @@ if __name__ == '__main__':
           "the minimum value in 1000 iterations.\n"
           "Again,that's because the size of each step is too small.")
     print("Q4")
+    compare_fixed_learning_rates()
+
     print("L2 reaches a better loss than L1,\nthat because it's gradient "
           "allows it take smaller step sizes than the size of L1'S steps,\n"
           "which allows L2 to reach smaller values which it would have "
           "missed if the size of the steps were larger.")
-    print("L1's best loss was reached using eta=0.001,\nthis suggest that "
-          "for eta =0.01 the size of the steps are too large smaller values "
+    print("L1's best loss was reached using eta=0.01,\nthis suggest that "
+          "for eta =0.1 the size of the steps are too large smaller values "
           "are missed.\nMeanwhile for eta =0.01, the sizes of the steps  are "
           "small enough to reach some of these smaller values.")
 
-    print("8")
+    print("Q8")
     print("Q9-11")
     #compare_exponential_decay_rates()
     fit_logistic_regression()

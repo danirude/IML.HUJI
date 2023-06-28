@@ -332,7 +332,7 @@ if __name__ == '__main__':
     print("Q4")
     compare_fixed_learning_rates()
 
-    print("L2 reaches a better loss than L1,\nthat because it's gradient "
+    print("L2 reaches a better loss than L1,\nthat's because it's gradient "
           "allows it take smaller step sizes than the size of L1'S steps,\n"
           "which allows L2 to reach smaller values which it would have "
           "missed if the size of the steps were larger.")
